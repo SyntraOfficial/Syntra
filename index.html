@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Syntra Executor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(circle at center, #0e0e0e, #070707);
+  color: #ffffff;
+  height: 100vh;
+  overflow: hidden;
+  cursor: none !important;
+}
+
+#custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px 4px white;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  cursor: none !important;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0e0e0e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 9999;
+  animation: fadeOut 1s ease 5s forwards;
+}
+
+#loading-screen img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.loading-text {
+  font-size: 1.2rem;
+  color: #aaa;
+  margin-bottom: 10px;
+  animation: loadingDots 2s steps(4, end) infinite;
+}
+
+.loading-line {
+  width: 200px;
+  height: 2px;
+  background: #ffffff33;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-line::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0%;
+  background: #ffffff;
+  animation: slideLine 2s infinite;
+}
+
+@keyframes loadingDots {
+  0% { content: 'loading'; }
+  25% { content: 'loading.'; }
+  50% { content: 'loading..'; }
+  75% { content: 'loading...'; }
+  100% { content: 'loading'; }
+}
+
+@keyframes slideLine {
+  0% { left: 0; width: 0%; }
+  50% { width: 100%; }
+  100% { left: 100%; width: 0%; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+.panel {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  max-width: 900px;
+  width: 95%;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.08), 0 0 120px rgba(0, 255, 255, 0.06);
+  animation: panelPop 0.8s ease-out forwards;
+  opacity: 0;
+  margin: auto;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.panel h1 {
+  font-size: 2.8rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-shadow: 0 0 5px rgba(255,255,255,0.3);
+  animation: glowText 1.5s ease-in-out infinite alternate;
+}
+
+.panel p {
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.buttons {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-radius: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.3s ease;
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+  cursor: none !important;
+}
+
+.btn:hover {
+  background: #ffffff;
+  color: #0e0e0e;
+  box-shadow: 0 0 20px #ffffffaa;
+  cursor: none !important;
+}
+
+.panel-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.executor-img {
+  width: 80%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+@keyframes glowText {
+  from { text-shadow: 0 0 5px rgba(255,255,255,0.2); }
+  to { text-shadow: 0 0 20px rgba(255,255,255,0.6); }
+}
+
+@keyframes panelPop {
+  from { opacity: 0; transform: scale(0.98) translateY(-50%); }
+  to { opacity: 1; transform: scale(1) translateY(-50%); }
+}
+
+#bottom-tabs {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 50;
+}
+
+.tab-btn {
+  background: rgba(255,255,255,0.08);
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: none !important;
+  transition: 0.3s;
+}
+
+.tab-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.tab-content {
+  position: fixed;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 900px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  backdrop-filter: blur(20px);
+  padding: 30px;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+  transition: 0.5s ease, opacity 0.5s ease;
+  opacity: 0;
+}
+
+.tab-content.active {
+  bottom: 80px;
+  opacity: 1;
+}
+
+.feature-box, .credit-box {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.feature-box:hover, .credit-box:hover {
+  transform: translateY(-5px);
+}
+
+.credit-box, .Why-box {
+  grid-column: span 2;
+}
+</style>
+</head>
+<body>
+<div id="custom-cursor"></div>
+
+<div id="loading-screen">
+  <img src="newlogo.png" alt="Loading Logo" />
+  <div class="loading-text">loading...</div>
+  <div class="loading-line"></div>
+</div>
+
+<div class="panel">
+  <h1>Syntra</h1>
+  <p>The Home of Syntra</p>
+  <div class="buttons">
+    <a href="Download.html" class="btn">Download</a>
+    <a href="https://dsc.gg/getsyntra" class="btn">Join Discord</a>
+  </div>
+
+  <div class="panel-content">
+ 
+    <img src="EXEC.png" alt="Syntra Executor UI" class="executor-img" />
+  </div>
+</div>
+
+<div id="bottom-tabs">
+  <div class="tab-btn" onclick="toggleTab('features')">Features</div>
+  <div class="tab-btn" onclick="toggleTab('credits')">Credits</div>
+  <div class="tab-btn" onclick="toggleTab('Why')">Why</div>
+</div>
+
+<div id="features" class="tab-content">
+  <div class="feature-box">Fast Execution and Injection</div>
+  <div class="feature-box">80% Unc</div>
+  <div class="feature-box">Super easy UI</div>
+  
+</div>
+
+<div id="credits" class="tab-content">
+  <div class="credit-box">
+    <h3>Blizzy</h3>
+    <p>Founder of Syntra, API Developer, Website Developer</p>
+  </div>
+  <div class="credit-box">
+    <h3>Jake</h3>
+    <p>UI Developer, API Developer</p>
+  </div>
+</div>
+
+<div id="Why" class="tab-content">
+  <div class="Why-box">
+    <p>
+At Syntra, we built this software to provide a reliable and powerful exploiting environment for everyone.  
+Though we launched a bit later and don’t have as many members yet, our passion and dedication never waver.  
+We keep pushing forward, improving, and growing—because at Syntra, we stay sharp, stay synced, and never give up.  
+Even with a small community, our spirit is unstoppable, and we are committed to making Syntra the best it can be.
+    </p>
+  </div>
+</div>
+
+<script>
+const cursor = document.getElementById("custom-cursor");
+document.addEventListener("mousemove", e => {
+  cursor.style.top = e.clientY + "px";
+  cursor.style.left = e.clientX + "px";
+});
+
+const loadingScreen = document.getElementById("loading-screen");
+loadingScreen.addEventListener("animationend", () => { 
+  loadingScreen.style.display = "none"; 
+});
+
+function toggleTab(tabId){
+  const tabs = document.querySelectorAll(".tab-content");
+  tabs.forEach(tab => {
+    if(tab.id === tabId){
+      tab.classList.toggle("active");
+    } else {
+      tab.classList.remove("active");
+    }
+  });
+}
+</script>
+</body>
+</html>
